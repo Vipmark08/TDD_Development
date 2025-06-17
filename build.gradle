@@ -1,16 +1,51 @@
 plugins {
+    id 'java'
     id 'groovy'
+    id 'jacoco'
+    id 'info.solidsoft.pitest' version '1.7.0'
 }
+
+group = 'com.example'
+version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation 'org.codehaus.groovy:groovy-all:3.0.8'
+    implementation 'org.codehaus.groovy:groovy-all:3.0.17'
+
+    // Spock Framework для спецификаций
     testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
+
+    // JUnit4 “мост” для Spock
+    testImplementation 'junit:junit:4.13.2'
+
+
 }
 
 test {
     useJUnitPlatform()
+    // После тестов собираем Jacoco-отчёт
+    finalizedBy jacocoTestReport
+
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    finalizedBy 'pitest'
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.enabled true
+        xml.enabled false
+        csv.enabled false
+    }
+
+}
+pitest {
+    junit5PluginVersion = '0.15'
+    targetClasses = ['com.example.*']
+    timestampedReports = false
 }
